@@ -6,3 +6,7 @@ lambda.zip
 
 # Lambda dev dependencies
 lambda/node_modules/
+
+# Other notes
+.superpowers/
+docs/

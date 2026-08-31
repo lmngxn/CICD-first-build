@@ -1,0 +1,32 @@
+name: terraform
+on:
+  pull_request:
+    paths: ["infra/**", "lambda/**"]
+  push:
+    branches: [main]
+    paths: ["infra/**", "lambda/**"]
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write   # only needed to post the plan as a PR comment
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::825056766387:role/github-actions-terraform-dev
+          aws-region: ap-southeast-1
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform fmt -check
+      - run: terraform init
+      - run: terraform validate
+      - run: terraform plan -no-color -out=tfplan
+      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve tfplan
