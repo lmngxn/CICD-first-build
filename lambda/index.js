@@ -1,5 +1,6 @@
 'use strict';
 
+const { randomUUID } = require('node:crypto');
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const {
   DynamoDBDocumentClient,
@@ -66,7 +67,7 @@ function makeHandler(docClient, tableName) {
         if (error) return res(statusCode, { message: error });
         const item = {
           ...data,
-          id: crypto.randomUUID(),
+          id: randomUUID(),
           createdAt: new Date().toISOString(),
         };
         await docClient.send(new PutCommand({ TableName: tableName, Item: item }));
