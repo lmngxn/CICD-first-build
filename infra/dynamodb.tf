@@ -8,8 +8,8 @@ resource "aws_dynamodb_table" "items" {
     type = "S"
   }
   tags = {
-    project = "cicd-first-build"
-    env     = var.stage_name
+    project    = "cicd-first-build"
+    env        = var.stage_name
     managed-by = "terraform"
   }
 }
