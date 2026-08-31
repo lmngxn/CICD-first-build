@@ -5,14 +5,20 @@ on:
   push:
     branches: [main]
     paths: ["infra/**", "lambda/**"]
-
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy"
+        required: true
+        type: choice
+        options: [dev, staging]
 permissions:
   id-token: write
   contents: read
   pull-requests: write   # only needed to post the plan as a PR comment
-
 jobs:
-  terraform:
+  deploy-dev:
+    if: github.event_name == 'push' || inputs.environment == 'dev'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -31,6 +37,23 @@ jobs:
         with:
           working_directory: infra
           soft_fail: false
-      - run: terraform plan -no-color -out=tfplan
-      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: terraform apply -auto-approve tfplan
+      - run: terraform plan -no-color -var-file=dev.tfvars
+      - run: terraform apply -auto-approve -var-file=dev.tfvars
+
+  deploy-staging:
+    if: inputs.environment == 'staging'
+    environment: staging          # ← approval gate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::156192247867:role/github-actions-terraform-staging
+          aws-region: ap-southeast-1
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform init -backend-config=backends/staging.hcl
+      - run: terraform plan -no-color -var-file=staging.tfvars
+      - run: terraform apply -auto-approve -var-file=staging.t
