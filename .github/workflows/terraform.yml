@@ -12,13 +12,15 @@ on:
         required: true
         type: choice
         options: [dev, staging]
+
 permissions:
   id-token: write
   contents: read
-  pull-requests: write   # only needed to post the plan as a PR comment
+  pull-requests: write
+
 jobs:
   deploy-dev:
-    if: github.event_name == 'push' || inputs.environment == 'dev'
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || inputs.environment == 'dev'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -38,11 +40,12 @@ jobs:
           working_directory: infra
           soft_fail: false
       - run: terraform plan -no-color -var-file=dev.tfvars
-      - run: terraform apply -auto-approve -var-file=dev.tfvars
+      - if: github.event_name == 'push'
+        run: terraform apply -auto-approve -var-file=dev.tfvars
 
   deploy-staging:
     if: inputs.environment == 'staging'
-    environment: staging          # ← approval gate
+    environment: staging
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -56,4 +59,4 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
       - run: terraform init -backend-config=backends/staging.hcl
       - run: terraform plan -no-color -var-file=staging.tfvars
-      - run: terraform apply -auto-approve -var-file=staging.t
+      - run: terraform apply -auto-approve -var-file=staging.tfvars
