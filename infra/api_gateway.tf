@@ -4,7 +4,7 @@ locals {
 
 # REST API
 resource "aws_api_gateway_rest_api" "items" {
-  name = "items-api"
+  name = "items-api-${var.stage_name}"
 
   endpoint_configuration {
     types = ["REGIONAL"]
@@ -157,7 +157,7 @@ resource "aws_api_gateway_deployment" "items" {
 
 # CloudWatch log group for API Gateway access logs
 resource "aws_cloudwatch_log_group" "api_gw" {
-  name              = "/aws/api-gateway/items-api"
+  name              = "/aws/api-gateway/items-api-${var.stage_name}"
   retention_in_days = 14
 }
 
@@ -190,12 +190,12 @@ resource "aws_api_gateway_stage" "dev" {
 
 # API key
 resource "aws_api_gateway_api_key" "items" {
-  name = "items-api-key"
+  name = "items-api-key-${var.stage_name}"
 }
 
 # Usage plan with throttle and quota limits
 resource "aws_api_gateway_usage_plan" "items" {
-  name = "items-usage-plan"
+  name = "items-usage-plan-${var.stage_name}"
 
   api_stages {
     api_id = aws_api_gateway_rest_api.items.id

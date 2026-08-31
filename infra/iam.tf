@@ -10,7 +10,7 @@ data "aws_iam_policy_document" "lambda_assume_role" {
 }
 
 resource "aws_iam_role" "lambda" {
-  name               = "items-lambda-role"
+  name               = "items-lambda-role-${var.stage_name}"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
 }
 
@@ -28,7 +28,7 @@ data "aws_iam_policy_document" "lambda_dynamodb" {
 }
 
 resource "aws_iam_role_policy" "lambda_dynamodb" {
-  name   = "items-lambda-dynamodb"
+  name   = "items-lambda-dynamodb-${var.stage_name}"
   role   = aws_iam_role.lambda.id
   policy = data.aws_iam_policy_document.lambda_dynamodb.json
 }
@@ -39,7 +39,7 @@ resource "aws_iam_role_policy_attachment" "lambda_basic" {
 }
 
 resource "aws_iam_role" "api_gateway_cloudwatch" {
-  name = "api-gateway-cloudwatch-role"
+  name = "api-gateway-cloudwatch-role-${var.stage_name}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"

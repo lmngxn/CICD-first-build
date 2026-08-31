@@ -6,12 +6,12 @@ data "archive_file" "lambda" {
 }
 
 resource "aws_cloudwatch_log_group" "lambda" {
-  name              = "/aws/lambda/items-handler"
+  name              = "/aws/lambda/items-handler-${var.stage_name}"
   retention_in_days = 14
 }
 
 resource "aws_lambda_function" "items" {
-  function_name    = "items-handler"
+  function_name    = "items-handler-${var.stage_name}"
   role             = aws_iam_role.lambda.arn
   handler          = "index.handler"
   runtime          = "nodejs22.x"
