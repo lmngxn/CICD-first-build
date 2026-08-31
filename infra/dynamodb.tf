@@ -7,4 +7,8 @@ resource "aws_dynamodb_table" "items" {
     name = "id"
     type = "S"
   }
+  tags = {
+    project = "cicd-first-build"
+    env     = var.stage_name
+  }
 }
