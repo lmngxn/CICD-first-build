@@ -155,11 +155,37 @@ resource "aws_api_gateway_deployment" "items" {
   }
 }
 
+# CloudWatch log group for API Gateway access logs
+resource "aws_cloudwatch_log_group" "api_gw" {
+  name              = "/aws/api-gateway/items-api"
+  retention_in_days = 14
+}
+
+# Account-level setting: grants API Gateway permission to write to CloudWatch
+resource "aws_api_gateway_account" "main" {
+  cloudwatch_role_arn = aws_iam_role.api_gateway_cloudwatch.arn
+}
+
 # Stage
 resource "aws_api_gateway_stage" "dev" {
   deployment_id = aws_api_gateway_deployment.items.id
   rest_api_id   = aws_api_gateway_rest_api.items.id
   stage_name    = var.stage_name
+
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_gw.arn
+    format = jsonencode({
+      requestId      = "$context.requestId"
+      ip             = "$context.identity.sourceIp"
+      httpMethod     = "$context.httpMethod"
+      resourcePath   = "$context.resourcePath"
+      status         = "$context.status"
+      responseLength = "$context.responseLength"
+      requestTime    = "$context.requestTime"
+    })
+  }
+
+  depends_on = [aws_api_gateway_account.main]
 }
 
 # API key

@@ -7,6 +7,15 @@ resource "aws_dynamodb_table" "items" {
     name = "id"
     type = "S"
   }
+
+  server_side_encryption {
+    enabled = true
+  }
+
+  point_in_time_recovery {
+    enabled = true
+  }
+
   tags = {
     project    = "cicd-first-build"
     env        = var.stage_name
