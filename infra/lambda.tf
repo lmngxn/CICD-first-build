@@ -28,4 +28,10 @@ resource "aws_lambda_function" "items" {
     aws_cloudwatch_log_group.lambda,
     aws_iam_role_policy_attachment.lambda_basic,
   ]
+
+  tags = {
+    project    = "cicd-first-build"
+    env        = var.stage_name
+    managed-by = "terraform"
+  }
 }
