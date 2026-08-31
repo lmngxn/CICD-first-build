@@ -10,5 +10,6 @@ resource "aws_dynamodb_table" "items" {
   tags = {
     project = "cicd-first-build"
     env     = var.stage_name
+    managed-by = "terraform"
   }
 }
