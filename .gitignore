@@ -1,0 +1,8 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+lambda.zip
+
+# Lambda dev dependencies
+lambda/node_modules/
